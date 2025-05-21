@@ -42,20 +42,10 @@ class VericodeIRGenerator:
             self._generate_func_call(stmt)
 
     def _generate_output(self, expr):
-        string_val = None
-        if isinstance(expr, Literal) and expr.value_type == "string":
-            fmt = expr.value + "\n\0"
-            string_val = ir.Constant(ir.ArrayType(ir.IntType(8), len(fmt)),
-                                     bytearray(fmt.encode("utf8")))
-            global_str = ir.GlobalVariable(self.module, string_val.type, name="fmt")
-            global_str.linkage = 'internal'
-            global_str.global_constant = True
-            global_str.initializer = string_val
-            str_ptr = self.builder.bitcast(global_str, ir.IntType(8).as_pointer())
-            self.builder.call(self.printf, [str_ptr])
-        else:
-            # TODO: Add other value types (int, float, identifiers)
-            pass
+    if isinstance(expr, Literal):
+        if expr.value_type == "string":
+            self._print_string(expr.value)
+        elif
 
     def _generate_func_call(self, call):
         callee = self.funcs.get(call.name)
