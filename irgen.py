@@ -260,3 +260,13 @@ class VericodeIRGenerator:
         self.builder.branch(cond_bb)
 
         self.builder.position_at_start(end_bb)
+
+class VericodeIRGenerator:
+    def __init__(self):
+        self.module = ir.Module(name="vericode_module")
+        self.builder = None
+        self.funcs = {}
+        self.printf = None
+        self.named_vars = {}
+        self.loop_context = []  # stack of (continue_block, break_block)
+        self._declare_printf()
