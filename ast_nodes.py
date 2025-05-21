@@ -192,3 +192,17 @@ class BinaryOp(ASTNode):
         self.left = left
         self.op = op
         self.right = right
+
+class IfStatement(ASTNode):
+    def __init__(self, condition, then_block, else_block=None):
+        super().__init__('IfStatement')
+        self.condition = condition
+        self.then_block = then_block
+        self.else_block = else_block  # Can be Block or another IfStatement
+
+class ForLoop(ASTNode):
+    def __init__(self, iterator, iterable, body):
+        super().__init__('ForLoop')
+        self.iterator = iterator
+        self.iterable = iterable
+        self.body = body
