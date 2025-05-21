@@ -6,3 +6,16 @@ make main() {
     }
     return
 }
+
+
+OR
+
+
+init values = [10, 20, 30]
+
+make main() {
+    for index in 3 {
+        out: values.index
+    }
+    return
+}
