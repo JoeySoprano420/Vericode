@@ -386,3 +386,33 @@ class VericodeIRGenerator:
         elif isinstance(expr, FunctionCall):
             return self._generate_func_call(expr)
 
+    def _generate_function(self, node: FunctionDef):
+        param_types = [ir.IntType(32) for _ in node.params]  # all int32 for now
+        return_ty = ir.IntType(32) if node.return_type != "void" else ir.VoidType()
+
+        func_ty = ir.FunctionType(return_ty, param_types)
+        func = ir.Function(self.module, func_ty, name=node.name)
+        self.funcs[node.name] = func
+
+        block = func.append_basic_block(name="entry")
+        self.builder = ir.IRBuilder(block)
+        self.named_vars = {}
+
+        # Store arguments
+        for i, name in enumerate(node.params):
+            arg = func.args[i]
+            var = self.builder.alloca(ir.IntType(32), name=name)
+            self.builder.store(arg, var)
+            self.named_vars[name] = var
+
+        ret_val = None
+        for stmt in node.body.statements:
+            if isinstance(stmt, ReturnStatement):
+                ret_val = self._eval_expression(stmt.value) if stmt.value else None
+                break
+            self.generate_statement(stmt)
+
+        if node.return_type != "void":
+            self.builder.ret(ret_val or ir.Constant(ir.IntType(32), 0))
+        else:
+            self.builder.ret_void()
