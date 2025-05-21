@@ -81,6 +81,24 @@ class Parser:
         else:
             raise SyntaxError("Expected = or ( after identifier")
 
+def _generate_method(self, method: MethodDef):
+    struct_ty = self.struct_types[method.struct_name]
+    func_name = f"{method.struct_name}_{method.method_name}"
+    func_ty = ir.FunctionType(ir.VoidType(), [struct_ty.as_pointer()])
+    func = ir.Function(self.module, func_ty, name=func_name)
+
+    self.funcs[func_name] = func
+    block = func.append_basic_block("entry")
+    self.builder = ir.IRBuilder(block)
+    self.named_vars = {}
+
+    # Bind self
+    self.named_vars["self"] = func.args[0]
+    for stmt in method.body.statements:
+        self.generate_statement(stmt)
+    self.builder.ret_void()
+
+
     def function_def(self):
         self.eat(TokenType.KEYWORD)  # make
         name = self.eat(TokenType.IDENTIFIER).value
@@ -429,3 +447,12 @@ def expression(self):
             return PointerAccess(Identifier(name), field)
         # fallback to existing
 
+elif isinstance(expr, Identifier):
+    if expr.name in self.named_vars:
+        return self.builder.load(self.named_vars[expr.name])
+    elif expr.name in self.struct_field_map.get("self", {}):
+        idx = self._get_struct_field_index("self", expr.name)
+        ptr = self.builder.gep(self.named_vars["self"],
+                               [ir.Constant(ir.IntType(32), 0),
+                                ir.Constant(ir.IntType(32), idx)])
+        return self.builder.load(ptr)
