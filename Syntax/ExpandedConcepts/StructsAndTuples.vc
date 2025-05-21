@@ -1,0 +1,10 @@
+structure Point {
+    x: int
+    y: int
+}
+
+init origin = Point(0, 0)
+out: origin.x
+
+init tup = (3, 7)
+out: tup.1
