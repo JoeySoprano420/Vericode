@@ -28,3 +28,27 @@ make main() {
 
     return
 }
+
+
+OR
+
+
+structure Point {
+    x: int
+    y: int
+}
+
+make make_point(): Point {
+    return Point(3, 4)
+}
+
+make sum_point(p: Point): int {
+    return p.x + p.y
+}
+
+make main() {
+    init pt = make_point()
+    init total = sum_point(pt)
+    out: total
+    return
+}
