@@ -1,0 +1,16 @@
+structure Point {
+    x: int
+    y: int
+}
+
+make make_point(): Point* {
+    alloc p = Point(5, 15)
+    return p
+}
+
+make main() {
+    init pt = make_point()
+    out: pt->x
+    out: pt->y
+    return
+}
