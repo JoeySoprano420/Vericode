@@ -1,0 +1,16 @@
+structure Person {
+    init name = ""
+    init age = 0
+
+    make speak() {
+        out: name
+    }
+}
+
+structure Student inherits Person {
+    init grade = "A"
+
+    make report() {
+        out: grade
+    }
+}
