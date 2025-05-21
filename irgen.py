@@ -220,3 +220,43 @@ class VericodeIRGenerator:
         callee = self.funcs.get(call.name)
         if callee:
             self.builder.call(callee, [])
+
+    def generate_statement(self, stmt):
+        # ... existing cases ...
+        elif isinstance(stmt, ForLoop):
+            self._generate_for(stmt)
+
+    def _generate_for(self, stmt):
+        loop_var_name = stmt.iterator
+        iterable = self._eval_expression(stmt.iterable)
+
+        start_val = ir.Constant(ir.IntType(32), 0)
+        end_val = iterable
+
+        ptr = self.builder.alloca(ir.IntType(32), name=loop_var_name)
+        self.builder.store(start_val, ptr)
+        self.named_vars[loop_var_name] = ptr
+
+        cond_bb = self.builder.append_basic_block("for_cond")
+        body_bb = self.builder.append_basic_block("for_body")
+        end_bb = self.builder.append_basic_block("for_end")
+
+        self.builder.branch(cond_bb)
+
+        # Condition check
+        self.builder.position_at_start(cond_bb)
+        index_val = self.builder.load(ptr)
+        cmp = self.builder.icmp_signed("<", index_val, end_val)
+        self.builder.cbranch(cmp, body_bb, end_bb)
+
+        # Body
+        self.builder.position_at_start(body_bb)
+        for s in stmt.body.statements:
+            self.generate_statement(s)
+
+        # Increment
+        next_val = self.builder.add(index_val, ir.Constant(ir.IntType(32), 1))
+        self.builder.store(next_val, ptr)
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(end_bb)
