@@ -1,0 +1,8 @@
+init items = [4, 8, 12]
+
+make main() {
+    for i in 3 {
+        out: items.i
+    }
+    return
+}
