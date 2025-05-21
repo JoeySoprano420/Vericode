@@ -269,3 +269,15 @@ class TupleAccess(ASTNode):
         super().__init__('TupleAccess')
         self.tuple_name = tuple_name
         self.index = index  # int
+
+class ListInit(ASTNode):
+    def __init__(self, elements):
+        super().__init__('ListInit')
+        self.elements = elements  # [expression, ...]
+
+class ListAccess(ASTNode):
+    def __init__(self, list_name, index_expr):
+        super().__init__('ListAccess')
+        self.list_name = list_name  # Identifier
+        self.index_expr = index_expr  # Expression
+
