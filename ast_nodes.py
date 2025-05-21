@@ -206,3 +206,13 @@ class ForLoop(ASTNode):
         self.iterator = iterator
         self.iterable = iterable
         self.body = body
+
+class BreakStatement(ASTNode):
+    def __init__(self):
+        super().__init__('BreakStatement')
+
+class ContinueStatement(ASTNode):
+    def __init__(self):
+        super().__init__('ContinueStatement')
+
+
