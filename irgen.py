@@ -370,3 +370,19 @@ class VericodeIRGenerator:
         else:
             self.builder.ret_void()
 
+    def _generate_func_call(self, call):
+        callee = self.funcs.get(call.name)
+        args = [self._eval_expression(arg) for arg in call.args]
+        return self.builder.call(callee, args)
+
+    def _eval_expression(self, expr):
+        if isinstance(expr, Literal):
+            return self._eval_literal(expr)
+        elif isinstance(expr, Identifier):
+            return self.builder.load(self.named_vars[expr.name])
+        elif isinstance(expr, BinaryOp):
+            # already handled
+            ...
+        elif isinstance(expr, FunctionCall):
+            return self._generate_func_call(expr)
+
