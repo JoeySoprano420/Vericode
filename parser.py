@@ -48,10 +48,13 @@ class Parser:
                 return self.verify_stmt()
             elif self.current.value == "proof":
                 return self.proof_stmt()
-        elif self.current.type == TokenType.IDENTIFIER:
+            elif self.current.type == TokenType.IDENTIFIER:
             return self.assignment_or_call()
-        else:
+            else:
             raise SyntaxError(f"Unknown statement start: {self.current.value}")
+            elif self.current.value == "for":
+            return self.for_loop()
+
 
     def declaration(self):
         self.eat(TokenType.KEYWORD)  # init
