@@ -603,3 +603,12 @@ def generate_statement(self, stmt):
             self.builder.store(val, field_ptr)
         self.named_vars[stmt.name] = typed_ptr
 
+def _eval_expression(self, expr):
+    if isinstance(expr, PointerAccess):
+        base_ptr = self.named_vars[expr.pointer.name]
+        struct_type = base_ptr.type.pointee
+        idx = self._get_struct_field_index(expr.pointer.name, expr.field)
+        field_ptr = self.builder.gep(base_ptr, [ir.Constant(ir.IntType(32), 0),
+                                                ir.Constant(ir.IntType(32), idx)])
+        return self.builder.load(field_ptr)
+
