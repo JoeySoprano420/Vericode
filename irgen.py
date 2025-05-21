@@ -21,12 +21,13 @@ class VericodeIRGenerator:
         elif isinstance(node, FunctionDef):
             self._generate_function(node)
 
-    def _generate_function(self, node):
+        def _generate_function(self, node):
         func_ty = ir.FunctionType(ir.VoidType(), [])
         func = ir.Function(self.module, func_ty, name=node.name)
         block = func.append_basic_block(name="entry")
         self.builder = ir.IRBuilder(block)
         self.funcs[node.name] = func
+        self.named_vars = {}
 
         for stmt in node.body.statements:
             self.generate_statement(stmt)
@@ -34,12 +35,32 @@ class VericodeIRGenerator:
         self.builder.ret_void()
 
     def generate_statement(self, stmt):
-        if isinstance(stmt, Output):
+        if isinstance(stmt, Declaration):
+            val = self._eval_literal(stmt.value)
+            if isinstance(val.type, ir.IntType):
+                var = self.builder.alloca(ir.IntType(32), name=stmt.name)
+            elif isinstance(val.type, ir.DoubleType):
+                var = self.builder.alloca(ir.DoubleType(), name=stmt.name)
+            else:
+                raise ValueError("Unsupported declaration type")
+            self.builder.store(val, var)
+            self.named_vars[stmt.name] = var
+        elif isinstance(stmt, Output):
             self._generate_output(stmt.expr)
         elif isinstance(stmt, ReturnStatement):
             self.builder.ret_void()
         elif isinstance(stmt, FunctionCall):
             self._generate_func_call(stmt)
+
+    def _eval_literal(self, literal):
+        if literal.value_type == "number":
+            if '.' in literal.value:
+                return ir.Constant(ir.DoubleType(), float(literal.value))
+            else:
+                return ir.Constant(ir.IntType(32), int(literal.value))
+        elif literal.value_type == "string":
+            raise NotImplementedError("Can't evaluate raw string to value yet")
+
 
         def _generate_output(self, expr):
         if isinstance(expr, Literal):
