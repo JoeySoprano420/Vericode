@@ -108,7 +108,16 @@ class Parser:
         params.append((param_name, param_type))
         ...
 
+def generate(self, node):
+    if isinstance(node, StructDef):
+        self._define_struct(node)
+    elif isinstance(node, MethodDef):
+        self._generate_method(node)
+    elif isinstance(node, Program):
+        for stmt in node.statements:
+            self.generate(stmt)
 
+    
     def structure_def(self):
         self.eat(TokenType.KEYWORD)  # structure
         name = self.eat(TokenType.IDENTIFIER).value
