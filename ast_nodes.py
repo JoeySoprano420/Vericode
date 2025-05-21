@@ -241,3 +241,31 @@ class ReturnStatement(ASTNode):
         super().__init__('ReturnStatement')
         self.value = value
 
+class StructDef(ASTNode):
+    def __init__(self, name, fields):
+        super().__init__('StructDef')
+        self.name = name
+        self.fields = fields  # list of (field_name, type)
+
+class StructInit(ASTNode):
+    def __init__(self, struct_name, values):
+        super().__init__('StructInit')
+        self.struct_name = struct_name
+        self.values = values  # list of expressions
+
+class StructAccess(ASTNode):
+    def __init__(self, instance, field):
+        super().__init__('StructAccess')
+        self.instance = instance  # Identifier
+        self.field = field        # str
+
+class TupleInit(ASTNode):
+    def __init__(self, values):
+        super().__init__('TupleInit')
+        self.values = values  # list of expressions
+
+class TupleAccess(ASTNode):
+    def __init__(self, tuple_name, index):
+        super().__init__('TupleAccess')
+        self.tuple_name = tuple_name
+        self.index = index  # int
