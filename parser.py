@@ -326,3 +326,13 @@ class Parser:
             else:
                 return Identifier(id_name)
 
+        elif self.current.value == "(":
+            self.eat(TokenType.SYMBOL)
+            elements = self.arguments()
+            self.eat(TokenType.SYMBOL)
+            return TupleInit(elements)
+
+        elif self.current.type == TokenType.NUMBER and self.current.value.isdigit():
+            idx = int(self.eat(TokenType.NUMBER).value)
+            return TupleAccess(id_name, idx)
+
