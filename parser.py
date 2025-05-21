@@ -311,3 +311,18 @@ class Parser:
         self.eat(TokenType.SYMBOL)  # }
         return StructDef(name, fields)
 
+    def expression(self):
+        if self.current.type == TokenType.IDENTIFIER:
+            id_name = self.eat(TokenType.IDENTIFIER).value
+            if self.current.value == "(":
+                self.eat(TokenType.SYMBOL)
+                args = self.arguments()
+                self.eat(TokenType.SYMBOL)
+                return StructInit(id_name, args)
+            elif self.current.value == ".":
+                self.eat(TokenType.SYMBOL)
+                field = self.eat(TokenType.IDENTIFIER).value
+                return StructAccess(Identifier(id_name), field)
+            else:
+                return Identifier(id_name)
+
