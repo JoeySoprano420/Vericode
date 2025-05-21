@@ -370,6 +370,35 @@ class VericodeIRGenerator:
         else:
             self.builder.ret_void()
 
+    def _generate_function(self, node: FunctionDef):
+    llvm_param_types = [self.map_type(t) for _, t in node.params]
+    return_ty = self.map_type(node.return_type)
+
+    func_ty = ir.FunctionType(return_ty, llvm_param_types)
+    func = ir.Function(self.module, func_ty, name=node.name)
+    self.funcs[node.name] = func
+
+    entry = func.append_basic_block("entry")
+    self.builder = ir.IRBuilder(entry)
+    self.named_vars = {}
+
+    for i, (pname, ptype) in enumerate(node.params):
+        arg = func.args[i]
+        var = self.builder.alloca(self.map_type(ptype), name=pname)
+        self.builder.store(arg, var)
+        self.named_vars[pname] = var
+
+    for stmt in node.body.statements:
+        if isinstance(stmt, ReturnStatement):
+            ret_val = self._eval_expression(stmt.value)
+            self.builder.ret(ret_val)
+            return
+        self.generate_statement(stmt)
+
+    if node.return_type == "void":
+        self.builder.ret_void()
+
+
     def _generate_func_call(self, call):
         callee = self.funcs.get(call.name)
         args = [self._eval_expression(arg) for arg in call.args]
@@ -533,10 +562,22 @@ elif isinstance(expr, FunctionCall):
                 self.builder.store(val, var)
                 self.named_vars[stmt.name] = var
 
-    def _eval_expression(self, expr):
+def _eval_expression(self, expr):
         # ... existing
         elif isinstance(expr, ListAccess):
             arr_ptr = self.named_vars[expr.list_name.name]
             index = self._eval_expression(expr.index_expr)
             gep = self.builder.gep(arr_ptr, [ir.Constant(ir.IntType(32), 0), index])
             return self.builder.load(gep)
+
+def map_type(self, vtype):
+    if vtype == "int":
+        return ir.IntType(32)
+    elif vtype == "float":
+        return ir.DoubleType()
+    elif vtype == "void":
+        return ir.VoidType()
+    elif vtype in self.struct_types:
+        return self.struct_types[vtype]
+    else:
+        raise ValueError(f"Unknown type: {vtype}")
