@@ -215,3 +215,25 @@ class Parser:
             return expr
         else:
             raise SyntaxError(f"Unexpected token in expression: {self.current.value}")
+
+    def if_stmt(self):
+        self.eat(TokenType.KEYWORD)  # check
+        cond = self.expression()
+        then_block = self.block()
+
+        else_block = None
+        if self.current.value == "else":
+            self.eat(TokenType.KEYWORD)
+            if self.current.value == "check":
+                else_block = self.if_stmt()  # else-if as recursive if
+            else:
+                else_block = self.block()
+        return IfStatement(cond, then_block, else_block)
+
+    def for_loop(self):
+        self.eat(TokenType.KEYWORD)  # for
+        iterator = self.eat(TokenType.IDENTIFIER).value
+        self.eat(TokenType.KEYWORD)  # in
+        iterable = self.expression()
+        body = self.block()
+        return ForLoop(iterator, iterable, body)
