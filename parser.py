@@ -362,3 +362,22 @@ def function_def(self):
 
     body = self.block()
     return FunctionDef(name, params, body, return_type)
+
+    def expression(self):
+        if self.current.value == "[":
+            self.eat(TokenType.SYMBOL)
+            items = self.arguments()
+            self.eat(TokenType.SYMBOL)
+            return ListInit(items)
+
+        elif self.current.type == TokenType.IDENTIFIER:
+            name = self.eat(TokenType.IDENTIFIER).value
+            if self.current.value == ".":
+                self.eat(TokenType.SYMBOL)
+                index = self.eat(TokenType.IDENTIFIER)
+                if index.type == TokenType.NUMBER or index.value.isdigit():
+                    return ListAccess(Identifier(name), Literal(index.value, "int"))
+                else:
+                    return ListAccess(Identifier(name), Identifier(index.value))
+            return Identifier(name)
+
