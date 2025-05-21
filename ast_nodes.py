@@ -246,6 +246,28 @@ class StructDef(ASTNode):
         super().__init__('StructDef')
         self.name = name
         self.fields = fields  # list of (field_name, type)
+        def structure_def(self):
+    ...
+    methods = []
+    fields = []
+    while self.current.value != "}":
+        if self.current.value == "make":
+            self.eat(TokenType.KEYWORD)
+            method_name = self.eat(TokenType.IDENTIFIER).value
+            self.eat(TokenType.SYMBOL)  # (
+            self.eat(TokenType.SYMBOL)  # )
+            body = self.block()
+            methods.append(MethodDef(name, method_name, body))
+        else:
+            field_name = self.eat(TokenType.IDENTIFIER).value
+            self.eat(TokenType.SYMBOL)
+            field_type = self.eat(TokenType.IDENTIFIER).value
+            fields.append((field_name, field_type))
+    self.eat(TokenType.SYMBOL)  # }
+
+    self.pending_methods += methods
+    return StructDef(name, fields)
+
 
 class StructInit(ASTNode):
     def __init__(self, struct_name, values):
@@ -292,4 +314,12 @@ class PointerAccess(ASTNode):
         super().__init__('PointerAccess')
         self.pointer = pointer  # Identifier or expression
         self.field = field      # string
+
+class MethodDef(ASTNode):
+    def __init__(self, struct_name, method_name, body, receiver_type="value"):
+        super().__init__('MethodDef')
+        self.struct_name = struct_name
+        self.method_name = method_name
+        self.body = body
+        self.receiver_type = receiver_type  # "value" or "pointer"
 
