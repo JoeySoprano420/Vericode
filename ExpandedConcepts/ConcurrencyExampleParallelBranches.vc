@@ -1,0 +1,18 @@
+init flag = true
+
+make jobA() {
+    out: "Running A"
+}
+
+make jobB() {
+    out: "Running B"
+}
+
+make coordinator() {
+    go jobA()
+    await jobB()
+    sync {
+        out: "Both tasks coordinated"
+    }
+    return
+}
