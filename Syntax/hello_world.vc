@@ -12,3 +12,14 @@ make main() {
     }
     return
 }
+
+
+or
+
+
+init message = "Hello from Vericode"
+
+make main() {
+    out: message
+    return
+}
