@@ -412,6 +412,12 @@ class VericodeIRGenerator:
                 break
             self.generate_statement(stmt)
 
+    def _generate_func_call(self, call):
+        callee = self.funcs.get(call.name)
+        args = [self._eval_expression(arg) for arg in call.args]
+        return self.builder.call(callee, args)
+
+
         if node.return_type != "void":
             self.builder.ret(ret_val or ir.Constant(ir.IntType(32), 0))
         else:
