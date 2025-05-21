@@ -1,0 +1,8 @@
+init age = 42
+init pi = 3.14
+
+make main() {
+    out: age
+    out: pi
+    return
+}
