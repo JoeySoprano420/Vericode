@@ -517,3 +517,18 @@ def _generate_func_call(self, call):
 elif isinstance(expr, FunctionCall):
     return self._generate_func_call(expr)
 
+    def generate_statement(self, stmt):
+        if isinstance(stmt, Declaration):
+            if isinstance(stmt.value, ListInit):
+                array_vals = [self._eval_expression(v) for v in stmt.value.elements]
+                el_type = array_vals[0].type
+                array_type = ir.ArrayType(el_type, len(array_vals))
+                const_array = ir.Constant(array_type, array_vals)
+                var = self.builder.alloca(array_type, name=stmt.name)
+                self.builder.store(const_array, var)
+                self.named_vars[stmt.name] = var
+            else:
+                val = self._eval_expression(stmt.value)
+                var = self.builder.alloca(val.type, name=stmt.name)
+                self.builder.store(val, var)
+                self.named_vars[stmt.name] = var
