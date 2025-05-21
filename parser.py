@@ -240,3 +240,12 @@ class Parser:
         iterable = self.expression()
         body = self.block()
         return ForLoop(iterator, iterable, body)
+
+    def statement(self):
+        # ... existing cases ...
+        elif self.current.value == "break":
+            self.eat(TokenType.KEYWORD)
+            return BreakStatement()
+        elif self.current.value == "continue":
+            self.eat(TokenType.KEYWORD)
+            return ContinueStatement()
