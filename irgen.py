@@ -422,3 +422,49 @@ class VericodeIRGenerator:
             self.builder.ret(ret_val or ir.Constant(ir.IntType(32), 0))
         else:
             self.builder.ret_void()
+
+class VericodeIRGenerator:
+    def __init__(self):
+        ...
+        self.struct_types = {}  # name: LLVMType
+
+    def generate(self, node):
+        if isinstance(node, StructDef):
+            self._define_struct(node)
+        elif isinstance(node, Program):
+            for stmt in node.statements:
+                self.generate(stmt)
+
+    def _define_struct(self, node):
+        field_types = []
+        for _, t in node.fields:
+            if t == "int":
+                field_types.append(ir.IntType(32))
+            elif t == "float":
+                field_types.append(ir.DoubleType())
+        struct_type = ir.LiteralStructType(field_types)
+        self.struct_types[node.name] = struct_type
+
+    def _eval_expression(self, expr):
+        if isinstance(expr, StructInit):
+            struct_type = self.struct_types[expr.struct_name]
+            values = [self._eval_expression(v) for v in expr.values]
+            struct_val = ir.Constant(struct_type, values)
+            ptr = self.builder.alloca(struct_type)
+            self.builder.store(struct_val, ptr)
+            return ptr
+
+        elif isinstance(expr, StructAccess):
+            base_ptr = self.named_vars[expr.instance.name]
+            struct_type = base_ptr.type.pointee
+            idx = self._get_struct_field_index(expr.instance.name, expr.field)
+            gep = self.builder.gep(base_ptr, [ir.Constant(ir.IntType(32), 0),
+                                              ir.Constant(ir.IntType(32), idx)])
+            return self.builder.load(gep)
+
+    def _get_struct_field_index(self, struct_name, field_name):
+        struct_def = next(s for s in self.struct_types if s == struct_name)
+        struct_fields = list(self.struct_types[struct_def].elements)
+        field_names = [f[0] for f in struct_fields]
+        return field_names.index(field_name)
+
