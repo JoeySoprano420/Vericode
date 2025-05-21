@@ -297,3 +297,17 @@ class Parser:
         if self.current.type in (TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.STRING, TokenType.BOOL):
             return ReturnStatement(self.expression())
         return ReturnStatement()
+
+    def structure_def(self):
+        self.eat(TokenType.KEYWORD)  # structure
+        name = self.eat(TokenType.IDENTIFIER).value
+        self.eat(TokenType.SYMBOL)  # {
+        fields = []
+        while self.current.value != "}":
+            field_name = self.eat(TokenType.IDENTIFIER).value
+            self.eat(TokenType.SYMBOL)  # :
+            type_name = self.eat(TokenType.IDENTIFIER).value
+            fields.append((field_name, type_name))
+        self.eat(TokenType.SYMBOL)  # }
+        return StructDef(name, fields)
+
