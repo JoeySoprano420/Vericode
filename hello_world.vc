@@ -1,0 +1,14 @@
+// Initialize message and print function
+init message = "Hello, Vericode."
+
+make print_msg() {
+    out: message
+}
+
+// Main execution logic
+make main() {
+    check message != null {
+        print_msg()
+    }
+    return
+}
