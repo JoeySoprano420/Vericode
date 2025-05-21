@@ -281,3 +281,15 @@ class ListAccess(ASTNode):
         self.list_name = list_name  # Identifier
         self.index_expr = index_expr  # Expression
 
+class HeapAlloc(ASTNode):
+    def __init__(self, typename, values):
+        super().__init__('HeapAlloc')
+        self.typename = typename
+        self.values = values
+
+class PointerAccess(ASTNode):
+    def __init__(self, pointer, field):
+        super().__init__('PointerAccess')
+        self.pointer = pointer  # Identifier or expression
+        self.field = field      # string
+
