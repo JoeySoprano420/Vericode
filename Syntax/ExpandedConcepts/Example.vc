@@ -1,0 +1,9 @@
+make add(x, y) {
+    return x + y
+}
+
+make main() {
+    init result = add(3, 5)
+    out: result
+    return
+}
