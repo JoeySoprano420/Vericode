@@ -1,0 +1,8 @@
+init nums = [1, 2, 3, 4, 5]
+
+make main() {
+    for i in 5 {
+        out: nums.i
+    }
+    return
+}
