@@ -1,0 +1,20 @@
+init i = 0
+
+make main() {
+    while i < 10 {
+        i = i + 1
+
+        check i == 5 {
+            continue
+        }
+
+        check i == 8 {
+            break
+        }
+
+        out: i
+    }
+
+    out: "Done"
+    return
+}
