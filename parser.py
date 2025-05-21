@@ -249,3 +249,28 @@ class Parser:
         elif self.current.value == "continue":
             self.eat(TokenType.KEYWORD)
             return ContinueStatement()
+
+    def function_def(self):
+        self.eat(TokenType.KEYWORD)  # make
+        name = self.eat(TokenType.IDENTIFIER).value
+        self.eat(TokenType.SYMBOL)  # (
+        params = []
+        if self.current.value != ")":
+            while True:
+                param_name = self.eat(TokenType.IDENTIFIER).value
+                params.append(param_name)
+                if self.current.value == ",":
+                    self.eat(TokenType.SYMBOL)
+                else:
+                    break
+        self.eat(TokenType.SYMBOL)  # )
+
+        body = self.block()
+        return FunctionDef(name, params, body)
+
+    def return_stmt(self):
+        self.eat(TokenType.KEYWORD)
+        if self.current.type in (TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.STRING, TokenType.BOOL):
+            return ReturnStatement(self.expression())
+        return ReturnStatement()
+
