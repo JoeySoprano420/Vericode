@@ -1,0 +1,15 @@
+init max = 3
+
+make main() {
+    for i in max {
+        check i == 0 {
+            out: "Start"
+        } else check i == 1 {
+            out: "Middle"
+        } else {
+            out: "End"
+        }
+    }
+
+    return
+}
