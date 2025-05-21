@@ -97,6 +97,17 @@ class Parser:
         self.eat(TokenType.SYMBOL)  # )
         body = self.block()
         return FunctionDef(name, params, body)
+        def function_def(self):
+    ...
+    while True:
+        param_name = self.eat(TokenType.IDENTIFIER).value
+        param_type = "int"
+        if self.current.value == ":":
+            self.eat(TokenType.SYMBOL)
+            param_type = self.eat(TokenType.IDENTIFIER).value
+        params.append((param_name, param_type))
+        ...
+
 
     def structure_def(self):
         self.eat(TokenType.KEYWORD)  # structure
