@@ -468,3 +468,52 @@ class VericodeIRGenerator:
         field_names = [f[0] for f in struct_fields]
         return field_names.index(field_name)
 
+def _generate_function(self, node: FunctionDef):
+    # Map Vericode types to LLVM types
+    def map_type(vtype):
+        if vtype == "int":
+            return ir.IntType(32)
+        elif vtype == "float":
+            return ir.DoubleType()
+        elif vtype == "void":
+            return ir.VoidType()
+        raise ValueError(f"Unknown type: {vtype}")
+
+    llvm_param_types = [map_type(t) for _, t in node.params]
+    return_ty = map_type(node.return_type)
+
+    func_ty = ir.FunctionType(return_ty, llvm_param_types)
+    func = ir.Function(self.module, func_ty, name=node.name)
+    self.funcs[node.name] = func
+
+    block = func.append_basic_block(name="entry")
+    self.builder = ir.IRBuilder(block)
+    self.named_vars = {}
+
+    # Allocate and store params
+    for i, (pname, ptype) in enumerate(node.params):
+        arg = func.args[i]
+        var = self.builder.alloca(map_type(ptype), name=pname)
+        self.builder.store(arg, var)
+        self.named_vars[pname] = var
+
+    # Emit body
+    retval = None
+    for stmt in node.body.statements:
+        if isinstance(stmt, ReturnStatement):
+            retval = self._eval_expression(stmt.value)
+            self.builder.ret(retval)
+            return  # exit early
+        self.generate_statement(stmt)
+
+    if node.return_type == "void":
+        self.builder.ret_void()
+
+def _generate_func_call(self, call):
+    callee = self.funcs.get(call.name)
+    args = [self._eval_expression(arg) for arg in call.args]
+    return self.builder.call(callee, args)
+
+elif isinstance(expr, FunctionCall):
+    return self._generate_func_call(expr)
+
