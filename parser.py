@@ -209,6 +209,14 @@ class Parser:
             right = self.term()
             left = BinaryOp(left, op, right)
         return left
+        elif self.current.value == ".":
+    self.eat(TokenType.SYMBOL)
+    method_name = self.eat(TokenType.IDENTIFIER).value
+    if self.current.value == "(":
+        self.eat(TokenType.SYMBOL)
+        self.eat(TokenType.SYMBOL)  # )
+        return FunctionCall(f"{name}.{method_name}", [Identifier(name)])
+
 
     def term(self):
         if self.current.type == TokenType.NUMBER:
