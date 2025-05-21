@@ -79,7 +79,81 @@ class VericodeIRGenerator:
         elif isinstance(stmt, FunctionCall):
             self._generate_func_call(stmt)
 
+        def _eval_expression(self, expr):
+        if isinstance(expr, Literal):
+            return self._eval_literal(expr)
+        elif isinstance(expr, Identifier):
+            return self.builder.load(self.named_vars[expr.name])
+        elif isinstance(expr, BinaryOp):
+            left = self._eval_expression(expr.left)
+            right = self._eval_expression(expr.right)
+            if expr.op == "+":
+                return self.builder.add(left, right)
+            elif expr.op == "-":
+                return self.builder.sub(left, right)
+            elif expr.op == "*":
+                return self.builder.mul(left, right)
+            elif expr.op == "/":
+                return self.builder.sdiv(left, right)
+            elif expr.op == "==":
+                return self.builder.icmp_signed("==", left, right)
+            elif expr.op == "!=":
+                return self.builder.icmp_signed("!=", left, right)
+            elif expr.op == ">":
+                return self.builder.icmp_signed(">", left, right)
+            elif expr.op == "<":
+                return self.builder.icmp_signed("<", left, right)
+            elif expr.op == ">=":
+                return self.builder.icmp_signed(">=", left, right)
+            elif expr.op == "<=":
+                return self.builder.icmp_signed("<=", left, right)
+            else:
+                raise ValueError(f"Unsupported binary op: {expr.op}")
 
+        def _generate_if(self, stmt):
+        cond_val = self._eval_expression(stmt.condition)
+        cond_bool = self.builder.icmp_signed("!=", cond_val, ir.Constant(cond_val.type, 0))
+
+        then_bb = self.builder.append_basic_block("if_then")
+        else_bb = self.builder.append_basic_block("if_else") if stmt.else_block else None
+        end_bb = self.builder.append_basic_block("if_end")
+
+        self.builder.cbranch(cond_bool, then_bb, else_bb or end_bb)
+
+        # Then block
+        self.builder.position_at_start(then_bb)
+        for s in stmt.then_block.statements:
+            self.generate_statement(s)
+        self.builder.branch(end_bb)
+
+        # Else block
+        if stmt.else_block:
+            self.builder.position_at_start(else_bb)
+            for s in stmt.else_block.statements:
+                self.generate_statement(s)
+            self.builder.branch(end_bb)
+
+        self.builder.position_at_start(end_bb)
+
+        def _generate_while(self, stmt):
+        cond_bb = self.builder.append_basic_block("while_cond")
+        body_bb = self.builder.append_basic_block("while_body")
+        end_bb = self.builder.append_basic_block("while_end")
+
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(cond_bb)
+        cond_val = self._eval_expression(stmt.condition)
+        cond_bool = self.builder.icmp_signed("!=", cond_val, ir.Constant(cond_val.type, 0))
+        self.builder.cbranch(cond_bool, body_bb, end_bb)
+
+        self.builder.position_at_start(body_bb)
+        for s in stmt.body.statements:
+            self.generate_statement(s)
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(end_bb)
+    
     def _eval_literal(self, literal):
         if literal.value_type == "number":
             if '.' in literal.value:
