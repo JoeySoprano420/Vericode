@@ -532,3 +532,11 @@ elif isinstance(expr, FunctionCall):
                 var = self.builder.alloca(val.type, name=stmt.name)
                 self.builder.store(val, var)
                 self.named_vars[stmt.name] = var
+
+    def _eval_expression(self, expr):
+        # ... existing
+        elif isinstance(expr, ListAccess):
+            arr_ptr = self.named_vars[expr.list_name.name]
+            index = self._eval_expression(expr.index_expr)
+            gep = self.builder.gep(arr_ptr, [ir.Constant(ir.IntType(32), 0), index])
+            return self.builder.load(gep)
