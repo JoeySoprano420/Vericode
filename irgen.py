@@ -587,3 +587,19 @@ def _declare_malloc(self):
     self.malloc = ir.Function(self.module, malloc_ty, name="malloc")
 
 self._declare_malloc()
+
+def generate_statement(self, stmt):
+    if isinstance(stmt.value, HeapAlloc):
+        struct_type = self.struct_types[stmt.value.typename]
+        values = [self._eval_expression(v) for v in stmt.value.values]
+        size = ir.Constant(ir.IntType(64), struct_type.get_abi_size(self.module.data_layout))
+
+        raw_ptr = self.builder.call(self.malloc, [size])
+        typed_ptr = self.builder.bitcast(raw_ptr, struct_type.as_pointer())
+        
+        for i, val in enumerate(values):
+            field_ptr = self.builder.gep(typed_ptr, [ir.Constant(ir.IntType(32), 0),
+                                                     ir.Constant(ir.IntType(32), i)])
+            self.builder.store(val, field_ptr)
+        self.named_vars[stmt.name] = typed_ptr
+
