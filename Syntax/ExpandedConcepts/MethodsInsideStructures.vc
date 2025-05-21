@@ -1,0 +1,9 @@
+structure Point {
+    x: int
+    y: int
+
+    make speak() {
+        out: x
+        out: y
+    }
+}
