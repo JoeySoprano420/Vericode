@@ -7,3 +7,24 @@ make main() {
     out: result
     return
 }
+
+
+OR
+
+
+structure Point {
+    x: int
+    y: int
+}
+
+make main() {
+    init p = Point(10, 20)
+    out: p.x
+    out: p.y
+
+    init tup = (7, 9)
+    out: tup.0
+    out: tup.1
+
+    return
+}
