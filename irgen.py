@@ -612,3 +612,9 @@ def _eval_expression(self, expr):
                                                 ir.Constant(ir.IntType(32), idx)])
         return self.builder.load(field_ptr)
 
+def map_type(self, vtype):
+    if vtype.endswith("*"):
+        base = self.map_type(vtype[:-1])
+        return base.as_pointer()
+    # existing logic
+
