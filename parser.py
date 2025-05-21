@@ -392,3 +392,14 @@ def function_def(self):
                     return ListAccess(Identifier(name), Identifier(index.value))
             return Identifier(name)
 
+def statement(self):
+    if self.current.value == "alloc":
+        self.eat(TokenType.KEYWORD)
+        var_name = self.eat(TokenType.IDENTIFIER).value
+        self.eat(TokenType.ASSIGN)
+        typename = self.eat(TokenType.IDENTIFIER).value
+        self.eat(TokenType.SYMBOL)  # (
+        values = self.arguments()
+        self.eat(TokenType.SYMBOL)  # )
+        return Declaration(var_name, HeapAlloc(typename, values))
+
