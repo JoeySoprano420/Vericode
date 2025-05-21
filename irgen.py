@@ -581,3 +581,8 @@ def map_type(self, vtype):
         return self.struct_types[vtype]
     else:
         raise ValueError(f"Unknown type: {vtype}")
+
+def _declare_malloc(self):
+    malloc_ty = ir.FunctionType(ir.IntType(8).as_pointer(), [ir.IntType(64)])
+    self.malloc = ir.Function(self.module, malloc_ty, name="malloc")
+
