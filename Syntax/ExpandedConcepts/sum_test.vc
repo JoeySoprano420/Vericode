@@ -1,0 +1,9 @@
+make sum(x: int, y: int): int {
+    return x + y
+}
+
+make main() {
+    init result = sum(10, 20)
+    out: result
+    return
+}
