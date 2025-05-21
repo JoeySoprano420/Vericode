@@ -1,0 +1,9 @@
+| debug_log:
+    out: "DEBUG"
+    out: message
+|
+
+make logger() {
+    init message = "Ready."
+    debug_log
+}
