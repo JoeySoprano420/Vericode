@@ -1,0 +1,30 @@
+// Declare count
+init count: int = 5
+
+// Loop countdown
+make countdown() {
+    while count > 0 {
+        out: count
+        count = count - 1
+    }
+}
+
+// Conditional logic with assertion
+make validate() {
+    check count == 0 {
+        verify true
+    } else {
+        throws {
+            out: "Error: count not zero."
+        } excepts {
+            return
+        }
+    }
+}
+
+// Main routine
+make main() {
+    countdown()
+    validate()
+    return
+}
