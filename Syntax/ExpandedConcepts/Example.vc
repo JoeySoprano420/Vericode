@@ -52,3 +52,22 @@ make main() {
     out: total
     return
 }
+
+
+OR
+
+structure Point {
+    x: int
+    y: int
+
+    make speak() {
+        out: x
+        out: y
+    }
+}
+
+make main() {
+    init pt = Point(7, 3)
+    pt.speak()
+    return
+}
