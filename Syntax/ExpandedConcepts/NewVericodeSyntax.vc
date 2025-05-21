@@ -1,0 +1,20 @@
+structure Point {
+    x: int
+    y: int
+}
+
+make create(): Point* {
+    alloc p = Point(10, 20)
+    return p
+}
+
+make show(p: Point*) {
+    out: p->x
+    out: p->y
+}
+
+make main() {
+    init obj = create()
+    show(obj)
+    return
+}
