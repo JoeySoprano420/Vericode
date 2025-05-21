@@ -336,3 +336,29 @@ class Parser:
             idx = int(self.eat(TokenType.NUMBER).value)
             return TupleAccess(id_name, idx)
 
+def function_def(self):
+    self.eat(TokenType.KEYWORD)  # make
+    name = self.eat(TokenType.IDENTIFIER).value
+    self.eat(TokenType.SYMBOL)  # (
+    params = []
+    if self.current.value != ")":
+        while True:
+            param_name = self.eat(TokenType.IDENTIFIER).value
+            param_type = "int"  # default
+            if self.current.value == ":":
+                self.eat(TokenType.SYMBOL)
+                param_type = self.eat(TokenType.IDENTIFIER).value
+            params.append((param_name, param_type))
+            if self.current.value == ",":
+                self.eat(TokenType.SYMBOL)
+            else:
+                break
+    self.eat(TokenType.SYMBOL)  # )
+
+    return_type = "void"
+    if self.current.value == ":":
+        self.eat(TokenType.SYMBOL)
+        return_type = self.eat(TokenType.IDENTIFIER).value
+
+    body = self.block()
+    return FunctionDef(name, params, body, return_type)
