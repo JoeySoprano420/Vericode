@@ -403,3 +403,12 @@ def statement(self):
         self.eat(TokenType.SYMBOL)  # )
         return Declaration(var_name, HeapAlloc(typename, values))
 
+def expression(self):
+    if self.current.type == TokenType.IDENTIFIER:
+        name = self.eat(TokenType.IDENTIFIER).value
+        if self.current.value == "->":
+            self.eat(TokenType.SYMBOL)
+            field = self.eat(TokenType.IDENTIFIER).value
+            return PointerAccess(Identifier(name), field)
+        # fallback to existing
+
