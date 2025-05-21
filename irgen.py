@@ -51,6 +51,34 @@ class VericodeIRGenerator:
             self.builder.ret_void()
         elif isinstance(stmt, FunctionCall):
             self._generate_func_call(stmt)
+                def generate_statement(self, stmt):
+        if isinstance(stmt, Declaration):
+            val = self._eval_literal(stmt.value)
+            var_type = val.type
+            var = self.builder.alloca(var_type, name=stmt.name)
+            self.builder.store(val, var)
+            self.named_vars[stmt.name] = var
+
+        elif isinstance(stmt, Assignment):
+            value = self._eval_expression(stmt.value)
+            var = self.named_vars[stmt.name]
+            self.builder.store(value, var)
+
+        elif isinstance(stmt, Output):
+            self._generate_output(stmt.expr)
+
+        elif isinstance(stmt, IfStatement):
+            self._generate_if(stmt)
+
+        elif isinstance(stmt, WhileLoop):
+            self._generate_while(stmt)
+
+        elif isinstance(stmt, ReturnStatement):
+            self.builder.ret_void()
+
+        elif isinstance(stmt, FunctionCall):
+            self._generate_func_call(stmt)
+
 
     def _eval_literal(self, literal):
         if literal.value_type == "number":
