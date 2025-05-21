@@ -215,4 +215,17 @@ class ContinueStatement(ASTNode):
     def __init__(self):
         super().__init__('ContinueStatement')
 
+class FunctionDef(ASTNode):
+    def __init__(self, name, params, body, return_type="void"):
+        super().__init__('FunctionDef')
+        self.name = name
+        self.params = params  # list of parameter names
+        self.body = body
+        self.return_type = return_type
+
+class ReturnStatement(ASTNode):
+    def __init__(self, value=None):
+        super().__init__('ReturnStatement')
+        self.value = value
+
 
