@@ -270,3 +270,73 @@ class VericodeIRGenerator:
         self.named_vars = {}
         self.loop_context = []  # stack of (continue_block, break_block)
         self._declare_printf()
+
+    def generate_statement(self, stmt):
+        # ... existing cases ...
+        elif isinstance(stmt, BreakStatement):
+            if not self.loop_context:
+                raise SyntaxError("break used outside loop")
+            _, break_bb = self.loop_context[-1]
+            self.builder.branch(break_bb)
+
+        elif isinstance(stmt, ContinueStatement):
+            if not self.loop_context:
+                raise SyntaxError("continue used outside loop")
+            continue_bb, _ = self.loop_context[-1]
+            self.builder.branch(continue_bb)
+    def _generate_while(self, stmt):
+        cond_bb = self.builder.append_basic_block("while_cond")
+        body_bb = self.builder.append_basic_block("while_body")
+        end_bb = self.builder.append_basic_block("while_end")
+
+        self.loop_context.append((cond_bb, end_bb))
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(cond_bb)
+        cond_val = self._eval_expression(stmt.condition)
+        cond_bool = self.builder.icmp_signed("!=", cond_val, ir.Constant(cond_val.type, 0))
+        self.builder.cbranch(cond_bool, body_bb, end_bb)
+
+        self.builder.position_at_start(body_bb)
+        for s in stmt.body.statements:
+            self.generate_statement(s)
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(end_bb)
+        self.loop_context.pop()
+
+    def _generate_for(self, stmt):
+        loop_var_name = stmt.iterator
+        iterable = self._eval_expression(stmt.iterable)
+
+        start_val = ir.Constant(ir.IntType(32), 0)
+        end_val = iterable
+
+        ptr = self.builder.alloca(ir.IntType(32), name=loop_var_name)
+        self.builder.store(start_val, ptr)
+        self.named_vars[loop_var_name] = ptr
+
+        cond_bb = self.builder.append_basic_block("for_cond")
+        body_bb = self.builder.append_basic_block("for_body")
+        end_bb = self.builder.append_basic_block("for_end")
+
+        self.loop_context.append((cond_bb, end_bb))
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(cond_bb)
+        index_val = self.builder.load(ptr)
+        cmp = self.builder.icmp_signed("<", index_val, end_val)
+        self.builder.cbranch(cmp, body_bb, end_bb)
+
+        self.builder.position_at_start(body_bb)
+        for s in stmt.body.statements:
+            self.generate_statement(s)
+
+        next_val = self.builder.add(index_val, ir.Constant(ir.IntType(32), 1))
+        self.builder.store(next_val, ptr)
+        self.builder.branch(cond_bb)
+
+        self.builder.position_at_start(end_bb)
+        self.loop_context.pop()
+
+
