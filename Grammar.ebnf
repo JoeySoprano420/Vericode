@@ -1,0 +1,89 @@
+program           = { statement } ;
+
+statement         = declaration
+                  | assignment
+                  | function_def
+                  | class_def
+                  | control_flow
+                  | concurrency
+                  | structure_op
+                  | logic_op
+                  | stream_op
+                  | exception
+                  | inline_macro
+                  | directive
+                  | comment ;
+
+declaration       = "init" identifier [ ":" type ] [ "=" expression ] ;
+assignment        = identifier "=" expression ;
+expression        = literal
+                  | identifier
+                  | function_call
+                  | operation
+                  | "(" expression ")" ;
+
+operation         = expression operator expression ;
+operator          = "+" | "-" | "*" | "/" | "%" | "^"
+                  | "==" | "!=" | "<" | ">" | "<=" | ">="
+                  | "and" | "or" | "xor" | "not" ;
+
+function_def      = "make" identifier "(" [ param_list ] ")" block ;
+param_list        = parameter { "," parameter } ;
+parameter         = identifier [ ":" type ] ;
+function_call     = identifier "(" [ arg_list ] ")" ;
+arg_list          = expression { "," expression } ;
+
+class_def         = "structure" identifier [ "inherits" identifier ] block ;
+block             = "{" { statement } "}" ;
+
+control_flow      = if_stmt | while_loop | for_loop | return_stmt | break_stmt ;
+
+if_stmt           = "check" expression block [ "else" block ] ;
+while_loop        = "while" expression block ;
+for_loop          = "for" identifier "in" expression block ;
+return_stmt       = "return" [ expression ] ;
+break_stmt        = "break" ;
+
+concurrency       = "await" expression
+                  | "go" expression
+                  | "sync" block ;
+
+structure_op      = "attach" identifier "to" identifier
+                  | "detach" identifier
+                  | "link" identifier "with" identifier ;
+
+logic_op          = "verify" expression
+                  | "assert" expression
+                  | "truth" ":" expression
+                  | "proof" ":" expression ;
+
+stream_op         = "in" ":" identifier
+                  | "out" ":" expression
+                  | "checkpoint" identifier ;
+
+exception         = "throws" block [ "excepts" block ] ;
+
+inline_macro      = "|" identifier ":" macro_body "|" ;
+macro_body        = { any_token } ;
+
+directive         = "#" directive_name [ directive_args ] ;
+directive_name    = identifier ;
+directive_args    = { identifier | literal } ;
+
+comment           = "//" { any_char } ;
+
+type              = "int" | "float" | "bool" | "string" | "node" | "map"
+                  | "list" | "tuple" | "stream" | "void" ;
+
+literal           = number | string_literal | boolean ;
+number            = digit { digit } ;
+string_literal    = '"' { any_char } '"' ;
+boolean           = "true" | "false" ;
+
+identifier        = letter { letter | digit | "_" } ;
+
+digit             = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+letter            = "A" .. "Z" | "a" .. "z" ;
+
+any_token         = ? anything valid except block end ? ;
+any_char          = ? any printable character ? ;
